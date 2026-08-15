@@ -1,0 +1,308 @@
+{
+  "name": "Architecture CRM Agent - Checkpoint 1",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b4f546b1-bd4b-43b3-8ae4-e6c802a2720d",
+      "name": "When chat message received",
+      "webhookId": "7611528b-0f9f-4e5f-bb73-44ace95e6a2f"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "# ROL\n\nEres el asistente de precalificación comercial de un estudio de arquitectura. Tu función es interpretar consultas iniciales de potenciales clientes y transformarlas en información estructurada útil para un CRM.\n\n# ÁMBITO\n\nPuedes intervenir exclusivamente en consultas relacionadas con:\n\n* proyectos de arquitectura;\n* reformas;\n* ampliaciones;\n* obra nueva;\n* interiorismo;\n* relevamientos;\n* documentación técnica;\n* consultas iniciales sobre servicios del estudio.\n\n# OBJETIVO\n\nDurante cada conversación debes:\n\n1. Identificar la necesidad principal del potencial cliente.\n2. Extraer únicamente información efectivamente proporcionada.\n3. Detectar información relevante faltante.\n4. Determinar si existe información suficiente para registrar un lead.\n5. Utilizar las herramientas disponibles solamente cuando corresponda.\n6. Recomendar la próxima acción comercial.\n\n# INFORMACIÓN RELEVANTE\n\nCuando se encuentre disponible, identifica:\n\n* nombre;\n* email;\n* teléfono;\n* ubicación del proyecto;\n* tipo de inmueble;\n* tipo de proyecto;\n* superficie aproximada;\n* alcance del trabajo;\n* presupuesto estimado;\n* plazo o fecha deseada;\n* estado actual del proyecto.\n\n# REGLAS\n\n* Nunca inventes información.\n* No asumas superficie, presupuesto, ubicación, datos personales ni fechas.\n* Cuando un dato no haya sido proporcionado, considéralo desconocido.\n* No proporciones presupuestos definitivos.\n* No confirmes disponibilidad del estudio sin disponer de una herramienta que permita comprobarla.\n* No brindes asesoramiento legal, estructural o técnico como si se tratara de una evaluación profesional del proyecto.\n* No ejecutes herramientas innecesariamente.\n* Antes de registrar información, verifica que la conversación represente una oportunidad comercial real.\n* No utilices lenguaje inclusivo.\n\n# POLÍTICA DE USO DE HERRAMIENTAS\n\nLas herramientas disponibles son capacidades opcionales y no pasos obligatorios del proceso.\n\nAntes de utilizar una herramienta, determina si su ejecución es necesaria para alcanzar el objetivo de la conversación.\n\nNunca utilices una herramienta únicamente porque se encuentre disponible.\n\nSi falta información necesaria para utilizar una herramienta correctamente, solicita primero los datos faltantes.\n\n# ESCALAMIENTO\n\nCuando una consulta requiera una evaluación profesional, un presupuesto definitivo, análisis estructural, interpretación normativa o cualquier decisión fuera de tu alcance, indícalo claramente y recomienda la intervención de un arquitecto responsable.\n# CRITERIO MÍNIMO PARA REGISTRAR UN LEAD\n\nUn lead puede registrarse únicamente si se cumplen estas condiciones:\n\n1. Existe una necesidad o proyecto arquitectónico identificable.\n2. Existe una ubicación o zona del proyecto.\n3. Existe al menos un dato de contacto: email o teléfono.\n\nEl nombre es deseable pero no obligatorio.\nEl presupuesto no es obligatorio.\nNo solicites información adicional que no sea necesaria para decidir si el lead puede registrarse.\n\nSi el lead no cumple los requisitos mínimos:\n- no utilices ninguna herramienta de registro;\n- solicita únicamente los datos faltantes necesarios.\n\nSi el lead cumple los requisitos mínimos:\n- utiliza la herramienta de registro disponible;\n- no vuelvas a pedir información ya proporcionada.\n\n# FORMATO DE DECISIÓN INTERNA\n\nAntes de actuar, determina:\n\nLEAD_VALIDO: SI o NO\nMOTIVO: razón breve\nACCION: REGISTRAR o SOLICITAR_DATOS\n\n# SEPARACIÓN ENTRE LÓGICA INTERNA Y RESPUESTA AL CLIENTE\n\nLa decisión sobre si una consulta constituye un lead válido, si debe registrarse y qué acción comercial interna corresponde es información de uso interno.\n\nNunca menciones al cliente:\n- que será registrado como lead;\n- que su información será cargada en un CRM;\n- que la consulta cumple o no criterios de precalificación;\n- decisiones internas del proceso comercial;\n- nombres de herramientas o sistemas utilizados.\n\nLa respuesta al cliente debe ser natural y limitarse a:\n- confirmar la información relevante recibida;\n- solicitar únicamente los datos faltantes necesarios;\n- indicar de forma clara el siguiente paso de la conversación.\n\nNo muestres etiquetas internas como LEAD_VALIDO, MOTIVO o ACCION.",
+          "maxIterations": 7,
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "82de2790-8447-4646-83ba-5ded98a0403f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        160,
+        208
+      ],
+      "id": "80206d27-d6ae-4341-89da-4853b79d48fb",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "TJEQ1trqm4umgNx6",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Esta herramienta registra una nueva consulta comercial de arquitectura.\n\nPRECONDICIONES OBLIGATORIAS PARA EJECUTAR ESTA HERRAMIENTA:\n\nLa herramienta SOLO puede ejecutarse cuando se cumplen SIMULTÁNEAMENTE estas tres condiciones:\n\n1. Existe una necesidad o proyecto arquitectónico identificable.\n2. Existe una ubicación o zona del proyecto.\n3. El usuario proporcionó explícitamente al menos UN medio de contacto:\n   - email, o\n   - teléfono.\n\nLa condición 3 es OBLIGATORIA.\n\nSi email está vacío Y teléfono está vacío:\nNO EJECUTES ESTA HERRAMIENTA BAJO NINGUNA CIRCUNSTANCIA.\n\nEn ese caso debes responder al usuario solicitando un email o teléfono y esperar una nueva interacción.\n\nNo registres consultas anticipadamente para completarlas después.\n\nEl nombre NO es obligatorio.\nEl presupuesto NO es obligatorio.\n\nNunca inventes email, teléfono, nombre ni ningún otro dato faltante.\n\nNo informes al usuario que utilizaste esta herramienta, Google Sheets, un CRM o que fue registrado como lead.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1gkne5iv-FSSxS5xTcJUO61Y_x-ccknYjSg4L_l97J6g",
+          "mode": "list",
+          "cachedResultName": "Architecture CRM Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gkne5iv-FSSxS5xTcJUO61Y_x-ccknYjSg4L_l97J6g/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gkne5iv-FSSxS5xTcJUO61Y_x-ccknYjSg4L_l97J6g/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha": "={{$now}}",
+            "nombre": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nombre', ``, 'string') }}",
+            "mail": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('mail', ``, 'string') }}",
+            "telefono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('telefono', ``, 'string') }}",
+            "ubicacion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ubicacion', ``, 'string') }}",
+            "tipo_inmueble": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tipo_inmueble', ``, 'string') }}",
+            "tipo_proyecto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tipo_proyecto', ``, 'string') }}",
+            "superficie": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('superficie', ``, 'string') }}",
+            "alcance": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('alcance', ``, 'string') }}",
+            "presupuesto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('presupuesto', ``, 'string') }}",
+            "plazo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('plazo', ``, 'string') }}",
+            "estado_proyecto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('estado_proyecto', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mail",
+              "displayName": "mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ubicacion",
+              "displayName": "ubicacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_inmueble",
+              "displayName": "tipo_inmueble",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_proyecto",
+              "displayName": "tipo_proyecto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "superficie",
+              "displayName": "superficie",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alcance",
+              "displayName": "alcance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "presupuesto",
+              "displayName": "presupuesto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "plazo",
+              "displayName": "plazo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado_proyecto",
+              "displayName": "estado_proyecto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        496,
+        144
+      ],
+      "id": "b8c7849e-2415-4111-a9e5-10989ec38b0c",
+      "name": "Append row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Exi2pLmTFAOaguoo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "test@test.com",
+        "subject": "Architecture CRM Agent | Execution Report",
+        "message": "=Architecture CRM Agent - Execution Report  Fecha: {{ $now }}  MENSAJE RECIBIDO {{ $('When chat message received').item.json.chatInput }}  RESPUESTA DEL AGENTE {{ $json.output }}  EJECUCIÓN DEL AGENTE {{ JSON.stringify($json.intermediateSteps, null, 2) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        0
+      ],
+      "id": "204b4f93-c5ea-4eae-9d26-1364716a7297",
+      "name": "Send a message",
+      "webhookId": "e09b7efe-4a5b-4082-8472-1f4cfa7e085c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XLE8VPzhuZX2kYi6",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d7037233-8af7-44e8-ac34-f16f9cbefdc8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "09205827d804ccfb50ea391120628c67c058bd12c6cac6ef602b14e20e1dd472"
+  },
+  "nodeGroups": [],
+  "id": "u6QPKDO7ehylRjqy",
+  "tags": []
+}
